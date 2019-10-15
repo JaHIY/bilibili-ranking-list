@@ -344,18 +344,27 @@ func writeDatabase(fromChannel <-chan BilibiliMedia) {
         var areasModel []*models.Area
         for _, area := range result.Areas {
             var areaModel models.Area
-            db.Where(models.Area{Name: area.Name}).FirstOrCreate(&areaModel)
+            err := tx.Where(models.Area{Name: area.Name}).FirstOrCreate(&areaModel).Error
+            if err != nil {
+                log.Fatal(err)
+            }
+
             areasModel = append(areasModel, &areaModel)
         }
 
         var stylesModel []*models.Style
         for _, style := range result.Styles {
             var styleModel models.Style
-            db.Where(models.Style{Name: style.Name}).FirstOrCreate(&styleModel)
+            err := tx.Where(models.Style{Name: style.Name}).FirstOrCreate(&styleModel).Error
+            if err != nil {
+                log.Fatal(err)
+            }
+
             stylesModel = append(stylesModel, &styleModel)
         }
 
-        mediaModel := models.Media{
+        var mediaModel models.Media
+        err = tx.Where(models.Media{BilibiliMediaId: result.MediaId}).Assign(models.Media{
             Actors: result.Actors,
             Alias: result.Alias,
             Areas: areasModel,
@@ -363,7 +372,7 @@ func writeDatabase(fromChannel <-chan BilibiliMedia) {
             Copyright: result.Rights.Copyright,
             Cover: result.Cover,
             Evaluate: result.Evaluate,
-            EpisodeIndex. result.EpisodeIndex.Index,
+            EpisodeIndex: result.EpisodeIndex.Index,
             OriginName: result.OriginName,
             IsFinish: result.Publish.IsFinish,
             IsStarted: result.Publish.IsStarted,
@@ -376,9 +385,7 @@ func writeDatabase(fromChannel <-chan BilibiliMedia) {
             StatViews: result.Stat.Views,
             Styles: stylesModel,
             Title: result.Title,
-        }
-
-        err = db.Create(&mediaModel).Error
+        }).FirstOrCreate(&mediaModel).Error
         if err != nil {
             tx.Rollback()
             log.Fatal(err)

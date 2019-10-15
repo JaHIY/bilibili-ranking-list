@@ -9,7 +9,7 @@ type Media struct {
     gorm.Model
     Actors string `gorm:"type:text;not null"`
     Alias string `gorm:"type:text;not null"`
-    Areas []*Area `gorm:"many2many:medias_areas"`
+    Areas []*Area `gorm:"many2many:media_areas"`
     BilibiliMediaId int `gorm:"unique;not null"`
     Copyright string `gorm:"type:text;not null"`
     Cover string `gorm:"type:text;not null"`
@@ -25,16 +25,18 @@ type Media struct {
     StatDanmakus int `gorm:"not null"`
     StatFavorites int `gorm:"not null"`
     StatViews int `gorm:"not null"`
-    Styles []*Style `gorm:"many2many:medias_styles"`
+    Styles []*Style `gorm:"many2many:media_styles"`
     Title string `gorm:"type:text;not null"`
 }
 
 type Area struct {
     gorm.Model
     Name string `gorm:"type:text;unique;not null"`
+    Medias []*Media `gorm:"many2many:media_areas"`
 }
 
 type Style struct {
     gorm.Model
     Name string `gorm:"type:text;unique;not null"`
+    Medias []*Media `gorm:"many2many:media_styles"`
 }
